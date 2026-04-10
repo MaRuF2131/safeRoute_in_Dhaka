@@ -1,8 +1,17 @@
 // app/page.js
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import MapComponent from '../components/MapComponent';
+
+const popularPlaces = [
+  "Mirpur 10", "Mirpur 14", "Mirpur 2", "Mirpur", 
+  "Uttara", "Uttara East", "Uttara West", "Abdullahpur",
+  "Farmgate", "Agargaon", "Shyamoli", "Dhanmondi",
+  "Motijheel", "Paltan", "Gulistan", "New Market",
+  "Gabtoli", "Technical", "Mohakhali", "Gulshan 2", 
+  "Banani", "Shahbag", "Kawran Bazar", "Malibagh"
+];
 
 export default function SafeRouteDhaka() {
   const [origin, setOrigin] = useState('');
@@ -11,32 +20,57 @@ export default function SafeRouteDhaka() {
   const [buses, setBuses] = useState([]);
   const [sortBy, setSortBy] = useState('fare'); // fare, time, distance
   const [loading, setLoading] = useState(false);
+  const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
+  const [showDestSuggestions, setShowDestSuggestions] = useState(false);
 
-  const dhakaBuses = [
-    { id: 1, name: "Best Transport", number: "বেস্ট ট্রান্সপোর্ট", fare: 45, time: "32 min", distance: "12.8 km", type: "সিটিং" },
-    { id: 2, name: "Al Makka", number: "আল মক্কা", fare: 40, time: "35 min", distance: "13.2 km", type: "লোকাল" },
-    { id: 3, name: "Bahon", number: "বাহন", fare: 50, time: "28 min", distance: "12.4 km", type: "সিটিং" },
-    { id: 4, name: "6 No. Motijheel Banani", number: "৬ নং", fare: 35, time: "40 min", distance: "14 km", type: "লোকাল" },
+
+// Static but realistic bus database
+  const busDatabase = [
+    { from: "mirpur", to: "motijheel", baseFare: 45, baseTime: "30-35 min", baseDistance: "12.5 km" },
+    { from: "uttara", to: "motijheel", baseFare: 55, baseTime: "45-55 min", baseDistance: "18 km" },
+    { from: "mirpur", to: "farmgate", baseFare: 30, baseTime: "20-25 min", baseDistance: "8 km" },
+    { from: "gabtoli", to: "new market", baseFare: 40, baseTime: "35 min", baseDistance: "11 km" },
+    { from: "uttara", to: "farmgate", baseFare: 45, baseTime: "35-40 min", baseDistance: "14 km" },
   ];
 
+const filteredOrigin = useMemo(() => 
+    popularPlaces.filter(p => p.toLowerCase().includes(origin.toLowerCase())), [origin]
+  );
+
+  const filteredDest = useMemo(() => 
+    popularPlaces.filter(p => p.toLowerCase().includes(destination.toLowerCase())), [destination]
+  );
+
   const findSafeRoute = () => {
-    if (!origin || !destination) return alert("অরিজিন ও ডেস্টিনেশন দিন");
+    if (!origin || !destination) return alert("Origin এবং Destination দিন");
 
     setLoading(true);
 
-    setTimeout(() => {
-      setRouteData({
-        duration: "28 min",
-        distance: "12.4 km",
-        cost: "40-50 taka",
-        safetyScore: "92%",
-        badBuildings: 7,
-        footpath: "Average",
-      });
+    const originLower = origin.toLowerCase();
+    const destLower = destination.toLowerCase();
 
-      setBuses(dhakaBuses);
+    const matched = busDatabase.find(r => 
+      originLower.includes(r.from) && destLower.includes(r.to)
+    ) || busDatabase[0]; // fallback
+
+    setTimeout(() => {
+      const calculatedBuses = [
+        { name: "Best Transport", number: "বেস্ট", fare: matched.baseFare, time: matched.baseTime, distance: matched.baseDistance },
+        { name: "Bahon", number: "বাহন", fare: matched.baseFare + 5, time: matched.baseTime, distance: matched.baseDistance },
+      ];
+
+      setBuses(calculatedBuses);
+      setRouteData({
+        origin: origin,
+        destination: destination,
+        duration: matched.baseTime,
+        distance: matched.baseDistance,
+        cost: `${matched.baseFare} - ${matched.baseFare + 10} টাকা`,
+        safetyScore: "87-92%",
+        polylineKey: `${matched.from}-${matched.to}`
+      });
       setLoading(false);
-    }, 1400);
+    }, 800);
   };
 
   // Sort buses
@@ -97,16 +131,47 @@ export default function SafeRouteDhaka() {
               type="text"
               placeholder="কোথা থেকে? (যেমন: Mirpur 10)"
               value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
+              onChange={(e) => { setOrigin(e.target.value); setShowOriginSuggestions(true); }}
+              onFocus={() => setShowOriginSuggestions(true)}
               className="w-full bg-[#1e2937] border border-gray-700 focus:border-green-500 rounded-xl px-5 py-3 outline-none"
             />
+
+            {showOriginSuggestions && origin && filteredOrigin.length > 0 && (
+              <div className=" hide-scrollbar z-50 w-full bg-[#1e2937] mt-2 rounded-2xl shadow-2xl max-h-60 overflow-auto">
+                {filteredOrigin.map((place, i) => (
+                  <div
+                    key={i}
+                    onClick={() => { setOrigin(place); setShowOriginSuggestions(false); }}
+                    className="px-5 py-3 hover:bg-green-500/20 cursor-pointer"
+                  >
+                    {place}
+                  </div>
+                ))}
+              </div>
+            )}
             <input
               type="text"
               placeholder="কোথায় যাবেন? (যেমন: Motijheel)"
               value={destination}
-              onChange={(e) => setDestination(e.target.value)}
+              onChange={(e) => { setDestination(e.target.value); setShowDestSuggestions(true); }}
+              onFocus={() => setShowDestSuggestions(true)}
               className="w-full bg-[#1e2937] border border-gray-700 focus:border-green-500 rounded-xl px-5 py-3 outline-none"
             />
+
+            {showDestSuggestions && destination && filteredDest.length > 0 && (
+              <div className="hide-scrollbar z-50 w-full bg-[#1e2937] mt-2 rounded-2xl shadow-2xl max-h-60 overflow-auto">
+                {filteredDest.map((place, i) => (
+                  <div
+                    key={i}
+                    onClick={() => { setDestination(place); setShowDestSuggestions(false); }}
+                    className="px-5 py-3 hover:bg-green-500/20 cursor-pointer"
+                  >
+                    {place}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button
               onClick={findSafeRoute}
               disabled={loading}
@@ -141,8 +206,8 @@ export default function SafeRouteDhaka() {
                 </div>
 
                 <div className="space-y-3">
-                  {sortedBuses.map(bus => (
-                    <div key={bus.id} className="bg-[#1e2937] p-4 rounded-2xl flex justify-between items-center hover:border-green-500 border border-transparent transition-all">
+                  {sortedBuses.map((bus,i) => (
+                    <div key={i} className="bg-[#1e2937] p-4 rounded-2xl flex justify-between items-center hover:border-green-500 border border-transparent transition-all">
                       <div>
                         <p className="font-semibold">{bus.name} ({bus.number})</p>
                         <p className="text-xs text-gray-400">{bus.type}</p>
