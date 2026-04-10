@@ -84,8 +84,8 @@ export default function SafeRouteDhaka() {
         </div>
 
         {/* RIGHT: SIDEBAR (সব তথ্য) */}
-        <div className="w-full lg:w-2/5 bg-[#0f172a] p-6 overflow-auto hide-scrollbar flex flex-col gap-6">
-          <div className="bg-[#1e2937] rounded-3xl p-6">
+        <div className="w-full lg:w-2/5 bg-[#0f172a] p-3 overflow-auto hide-scrollbar flex flex-col gap-6">
+          <div className="bg-[#1e2937] rounded-xl p-3">
             <p className="text-green-400 mb-3">Assalamu Alaikum! আমি SafeRoute।</p>
             <p className="text-gray-300 leading-relaxed">
               বলুন কোথা থেকে কোথায় যাবেন। আমি আপনার জন্য সবচেয়ে নিরাপদ, সস্তা এবং ভালো অবস্থার রাস্তা বের করে দিব।
@@ -98,19 +98,19 @@ export default function SafeRouteDhaka() {
               placeholder="কোথা থেকে? (যেমন: Mirpur 10)"
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
-              className="w-full bg-[#1e2937] border border-gray-700 focus:border-green-500 rounded-2xl px-5 py-4 outline-none"
+              className="w-full bg-[#1e2937] border border-gray-700 focus:border-green-500 rounded-xl px-5 py-3 outline-none"
             />
             <input
               type="text"
               placeholder="কোথায় যাবেন? (যেমন: Motijheel)"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              className="w-full bg-[#1e2937] border border-gray-700 focus:border-green-500 rounded-2xl px-5 py-4 outline-none"
+              className="w-full bg-[#1e2937] border border-gray-700 focus:border-green-500 rounded-xl px-5 py-3 outline-none"
             />
             <button
               onClick={findSafeRoute}
               disabled={loading}
-              className="w-full bg-green-500 hover:bg-green-600 py-5 rounded-2xl text-xl font-semibold transition-all"
+              className="w-full bg-green-500 hover:bg-green-600 py-3 rounded-xl text-xl font-semibold transition-all"
             >
               {loading ? "রুট খুঁজছে..." : "Find Safe Route"}
             </button>
