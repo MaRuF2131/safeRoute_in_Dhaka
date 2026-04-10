@@ -1,22 +1,59 @@
 // components/MapComponent.js
-/* 'use client'; */
+'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
-// Default marker icon fix for Next.js
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// Dynamic import with no SSR
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+);
+const Polyline = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Polyline),
+  { ssr: false }
+);
+
+/* import 'leaflet/dist/leaflet.css'; */
 
 // Dhaka City Center (এটাই তোমার মেইন ফোকাস)
 const dhakaCenter = [23.8103, 90.4125];
 
 export default function MapComponent({ routeData }) {
+
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const L = require('leaflet');      
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      });
+    }
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="h-full w-full bg-[#1e2937] flex items-center justify-center">
+        <p className="text-gray-400">Loading Dhaka Map...</p>
+      </div>
+    );
+  }
   // Mirpur → Motijheel এর একটা সুন্দর রুট (উদাহরণ)
   const dhakaSafeRoute = [
     [23.8065, 90.3685],   // Mirpur-10
