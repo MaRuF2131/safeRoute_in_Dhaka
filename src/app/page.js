@@ -84,7 +84,7 @@ export default function SafeRouteDhaka() {
         </div>
 
         {/* RIGHT: SIDEBAR (সব তথ্য) */}
-        <div className="w-full lg:w-2/5 bg-[#0f172a] p-3 overflow-auto hide-scrollbar flex flex-col gap-6">
+        <div className="w-full lg:w-2/5 bg-[#0f172a] pl-3 overflow-auto hide-scrollbar flex flex-col gap-6">
           <div className="bg-[#1e2937] rounded-xl p-3">
             <p className="text-green-400 mb-3">Assalamu Alaikum! আমি SafeRoute।</p>
             <p className="text-gray-300 leading-relaxed">
